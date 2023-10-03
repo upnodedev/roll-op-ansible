@@ -1,7 +1,7 @@
 ---
 # tasks file for roll-op
 - set_fact:
-  user_dir: '{{ lookup('env', 'HOME') }}'  
+    user_dir: "{{ lookup('env', 'HOME') }}"  
 
 - name: Install build-essential
   become: true
@@ -135,7 +135,7 @@
   become: true
   systemd:
     name: rollop-l1-rpc
-    state: {{ rollop_state }}
+    state: '{{ rollop_state }}'
     daemon_reload: true
 
 - name: Generate startup script
@@ -157,5 +157,5 @@
   become: true
   systemd:
     name: start-rollop
-    state: {{ rollop_state }}
+    state: '{{ rollop_state }}'
     daemon_reload: true
