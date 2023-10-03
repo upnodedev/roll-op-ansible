@@ -1,0 +1,164 @@
+---
+# tasks file for roll-op
+    
+- name: Install build-essential
+  become: true
+  apt: name=build-essential state=latest update_cache=yes
+
+- name: Python setup
+  include_role:
+    name: geerlingguy.pip
+    apply:
+      become: true
+  vars:
+    pip_install_packages:
+      - name: hdwallet
+
+- name: Clone roll-op repo
+  git:
+    repo: 'https://github.com/0xFableOrg/roll-op'
+    dest: 'roll-op'
+
+- name: Check for an existing mnemonic file
+  ansible.builtin.stat:
+    path: 'roll-op/.mnemonic'
+  register: mnemonic_file_status
+
+- name: Retrieve mnemonic from file
+  ansible.builtin.slurp:
+    src: 'roll-op/.mnemonic'
+  register: mnemonic_data
+  when: mnemonic_file_status.stat.exists
+
+- name: Set roll_op_seed_phrase to saved mnemonic
+  set_fact:
+    roll_op_seed_phrase: "{{ mnemonic_data['content'] | b64decode }}"
+  when: mnemonic_file_status.stat.exists
+
+- name: Generate data and new mnemonic
+  block:
+  - name: Run generate_accounts using existng mnemonic
+    script: 'generate_accounts.py "{{roll_op_seed_phrase}}" {{roll_op_seed_phrase_language}}'
+    args:
+      #chdir: 'roll-op'
+      executable: python3
+    register: account_output
+  - name: Read account variables
+    set_fact:
+      roll_op_admin_account: '{{ (account_output.stdout | from_json).adminAccount }}'
+      roll_op_admin_key: '{{ (account_output.stdout | from_json).adminKey }}'
+      roll_op_batcher_account: '{{ (account_output.stdout | from_json).batcherAccount }}'
+      roll_op_batcher_key: '{{ (account_output.stdout | from_json).batcherKey }}'
+      roll_op_proposer_account: '{{ (account_output.stdout | from_json).proposerAccount }}'
+      roll_op_proposer_key: '{{ (account_output.stdout | from_json).proposerKey }}'
+      roll_op_p2p_sequencer_account: '{{ (account_output.stdout | from_json).sequencerAccount }}'
+      roll_op_p2p_sequencer_key: '{{ (account_output.stdout | from_json).sequencerKey }}'
+  when: roll_op_seed_phrase is defined
+
+- name: Generate data and new mnemonic
+  block:
+  - name: Run generate_accounts
+    script: 'generate_accounts.py'
+    args:
+      executable: python3
+    register: account_output
+  - name: Read account variables
+    set_fact:
+      roll_op_new_seed_phrase: '{{ (account_output.stdout | from_json).mnemonic }}'
+      roll_op_admin_account: '{{ (account_output.stdout | from_json).adminAccount }}'
+      roll_op_admin_key: '{{ (account_output.stdout | from_json).adminKey }}'
+      roll_op_batcher_account: '{{ (account_output.stdout | from_json).batcherAccount }}'
+      roll_op_batcher_key: '{{ (account_output.stdout | from_json).batcherKey }}'
+      roll_op_proposer_account: '{{ (account_output.stdout | from_json).proposerAccount }}'
+      roll_op_proposer_key: '{{ (account_output.stdout | from_json).proposerKey }}'
+      roll_op_p2p_sequencer_account: '{{ (account_output.stdout | from_json).sequencerAccount }}'
+      roll_op_p2p_sequencer_key: '{{ (account_output.stdout | from_json).sequencerKey }}'
+  - name: Save mnemonic to file
+    copy:
+      content: '{{roll_op_new_seed_phrase}}'
+      dest: 'roll-op/.mnemonic'
+  when: roll_op_seed_phrase is not defined
+
+# todo - verify this syntax
+- name: Get l1 chain id if rpc is defined
+  block:
+  - name: Call rpc for chain id
+    uri:
+      method: POST
+      url: '{{roll_op_l1_rpc}}'
+      return_content: yes
+      body: '{"method":"eth_chainId","params":[],"id":1,"jsonrpc":"2.0"}'
+    register: roll_op_eth_chainId_results
+  - name: Extract l1 chain id
+    set_fact:
+      roll_op_l1_chain_id: '{{ roll_op_eth_chainId_results.json.result }}'
+  when: roll_op_l1_rpc is defined
+
+- name: Default l1 variables if rpc is not defined
+  set_fact:
+    roll_op_l1_chain_id: 900
+    roll_op_l1_rpc: 'http://127.0.0.1:8545'
+  when: roll_op_l1_rpc is not defined
+
+- name: Generate config.toml
+  template:
+    src: config.toml.j2
+    dest: 'roll-op/config.toml'
+    mode: '0644'
+
+- name: Run rollop setup
+  become: true
+  command: './rollop setup --yes'
+  args:
+    chdir: 'roll-op'
+  ignore_errors: true
+
+- name: Run rollop clean
+  become: true
+  command: './rollop --name={{roll_op_rollup_name}} clean'
+  args:
+    chdir: 'roll-op'
+  ignore_errors: true
+  when: roll_op_clean == true
+
+# todo - user settings
+
+- name: copy l1 service file
+  become: true
+  template:
+    src: rollop-l1-rpc.service.j2
+    dest: /etc/systemd/system/rollop-l1-rpc.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Set l1 service to desired state
+  become: true
+  systemd:
+    name: rollop-l1-rpc
+    state: {{ rollop_state }}
+    daemon_reload: true
+
+- name: Generate startup script
+  template:
+    src: start-rollop.sh.j2
+    dest: 'start-rollop.sh.toml'
+    mode: '0755'
+
+# todo - user settings
+
+- name: copy l2 service file
+  become: true
+  template:
+    src: start-rollop.service.j2
+    dest: /etc/systemd/system/start-rollop.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Set l2 service to desired state
+  become: true
+  systemd:
+    name: start-rollop
+    state: {{ rollop_state }}
+    daemon_reload: true

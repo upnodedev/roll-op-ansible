@@ -1,0 +1,28 @@
+l2_chain_id = {{ roll_op_l2_chain_id }}
+
+## Devnet
+
+# (same as defaults)
+l1_chain_id = {{ roll_op_l1_chain_id }}
+l1_rpc = "{{ roll_op_l1_rpc }}"
+
+## For Goerli
+
+#l1_chain_id = 5
+#l1_rpc = "https://ethereum-goerli.publicnode.com"
+
+## Keys
+
+# We just use the 0th "test junk" (Anvil) mnemonic account for everything.
+# This is ifferent from defaults, which use different accounts,
+# following after the Optimism monorepo devnet defaults.
+
+contract_deployer_key = "{{ roll_op_admin_key }}"
+batcher_account = "{{ roll_op_batcher_account }}"
+batcher_key = "{{ roll_op_batcher_key }}"
+proposer_account = "{{ roll_op_proposer_account }}"
+proposer_key = "{{ roll_op_proposer_key }}"
+admin_account = "{{ roll_op_admin_account }}"
+admin_key = "{{ roll_op_admin_key }}"
+p2p_sequencer_account = "{{ roll_op_p2p_sequencer_account }}"
+p2p_sequencer_key = "{{ roll_op_p2p_sequencer_key }}""

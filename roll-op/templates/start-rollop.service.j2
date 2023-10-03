@@ -1,0 +1,14 @@
+[Unit]
+Description=Ansible controller
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+User=root # todo - set to correct user
+Group=root # todo - set to correct user
+WorkingDirectory={{user_dir}} # todo - set directory correctly
+ExecStart=bash start-rollop.sh
+
+[Install]
+WantedBy=multi-user.target

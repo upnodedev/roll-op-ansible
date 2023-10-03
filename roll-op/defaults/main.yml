@@ -1,0 +1,8 @@
+---
+# defaults file for roll-op
+
+roll_op_l2_chain_id: 42069
+roll_op_rollup_name: 'getting-started'
+roll_op_seed_phrase_language: 'english'
+roll_op_clean: false
+roll_op_preset: 'dev'
