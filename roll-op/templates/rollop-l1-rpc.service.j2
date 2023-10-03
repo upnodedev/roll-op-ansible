@@ -5,9 +5,9 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-User=root # todo - set to correct user
-Group=root # todo - set to correct user
-WorkingDirectory={{user_dir}}/roll-op # todo - set directory correctly
+User={{ ansible_user }}
+Group={{ ansible_user }}
+WorkingDirectory={{user_dir}}/roll-op
 ExecStart=./rollop l1
 
 [Install]

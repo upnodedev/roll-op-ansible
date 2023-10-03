@@ -1,6 +1,8 @@
 ---
 # tasks file for roll-op
-    
+- set_fact:
+  user_dir: '{{ lookup('env', 'HOME') }}'  
+
 - name: Install build-essential
   become: true
   apt: name=build-essential state=latest update_cache=yes
@@ -79,7 +81,6 @@
       dest: 'roll-op/.mnemonic'
   when: roll_op_seed_phrase is not defined
 
-# todo - verify this syntax
 - name: Get l1 chain id if rpc is defined
   block:
   - name: Call rpc for chain id
@@ -121,8 +122,6 @@
   ignore_errors: true
   when: roll_op_clean == true
 
-# todo - user settings
-
 - name: copy l1 service file
   become: true
   template:
@@ -144,8 +143,6 @@
     src: start-rollop.sh.j2
     dest: 'start-rollop.sh.toml'
     mode: '0755'
-
-# todo - user settings
 
 - name: copy l2 service file
   become: true
