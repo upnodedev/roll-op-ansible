@@ -113,12 +113,12 @@
     mode: '0644'
 
 - name: Run rollop setup
-  shell: './rollop setup --yes'
+  shell: './rollop --no-ansi-esc setup --yes'
   args:
     chdir: 'roll-op'
 
 - name: Run rollop clean
-  shell: './rollop --name={{roll_op_rollup_name}} clean'
+  shell: './rollop --name={{roll_op_rollup_name}} --no-ansi-esc clean'
   args:
     chdir: 'roll-op'
   when: roll_op_clean == true
@@ -142,7 +142,7 @@
 - name: Generate startup script
   template:
     src: start-rollop.sh.j2
-    dest: 'start-rollop.sh.toml'
+    dest: 'start-rollop.sh'
     mode: '0755'
 
 - name: copy l2 service file

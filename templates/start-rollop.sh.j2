@@ -4,7 +4,7 @@ ROLLUP_NAME={{ roll_op_rollup_name }}
 ROLLUP_PRESET={{ roll_op_preset }}
 
 if [ ! -f "./roll-op/deployments/$ROLLUP_NAME/addresses.json" ]; then
-    ./roll-op/rollop --name=$ROLLUP_NAME --preset=$ROLLUP_PRESET --config=config.toml deploy-l2
+    ./roll-op/rollop --name=$ROLLUP_NAME --preset=$ROLLUP_PRESET --config=config.toml --no-ansi-esc deploy-l2
 fi
 
-./roll-op/rollop --name=$ROLLUP_NAME --preset=$ROLLUP_PRESET --config=config.toml start-l2
+./roll-op/rollop --name=$ROLLUP_NAME --preset=$ROLLUP_PRESET --config=config.toml --no-ansi-esc start-l2
