@@ -12,6 +12,15 @@
   become: true
   apt: name=build-essential state=latest update_cache=yes
 
+- name: Add etherium repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: ppa:ethereum/ethereum
+
+- name: Install geth
+  become: true
+  apt: name=ethereum state=latest update_cache=yes
+
 - name: Python setup
   include_role:
     name: geerlingguy.pip
