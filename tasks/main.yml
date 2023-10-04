@@ -1,7 +1,12 @@
 ---
 # tasks file for roll-op
+
+- user:
+    name: '{{ansible_user}}'
+    state: present
+  register: ansible_user_data 
 - set_fact:
-    user_dir: "{{ lookup('env', 'HOME') }}"  
+    user_dir: '{{ansible_user_data.home}}'  
 
 - name: Install build-essential
   become: true
@@ -108,18 +113,14 @@
     mode: '0644'
 
 - name: Run rollop setup
-  become: true
-  command: './rollop setup --yes'
+  shell: './rollop setup --yes'
   args:
     chdir: 'roll-op'
-  ignore_errors: true
 
 - name: Run rollop clean
-  become: true
-  command: './rollop --name={{roll_op_rollup_name}} clean'
+  shell: './rollop --name={{roll_op_rollup_name}} clean'
   args:
     chdir: 'roll-op'
-  ignore_errors: true
   when: roll_op_clean == true
 
 - name: copy l1 service file
