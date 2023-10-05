@@ -7,8 +7,8 @@ Type=simple
 Restart=always
 User={{ ansible_user }}
 Group={{ ansible_user }}
-WorkingDirectory={{ user_dir }}/roll-op
-ExecStart={{ user_dir }}/roll-op/rollop --no-ansi-esc l1
+WorkingDirectory={{ rollop_user_dir }}/roll-op
+ExecStart={{ rollop_user_dir }}/roll-op/rollop --no-ansi-esc l1
 
 [Install]
 WantedBy=multi-user.target

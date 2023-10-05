@@ -3,6 +3,38 @@
 ROLLUP_NAME={{ roll_op_rollup_name }}
 ROLLUP_PRESET={{ roll_op_preset }}
 
+IS_DEVNET={{ roll_op_is_devnet | bool | lower }}
+
+#ADMIN_ACCOUNT=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+#BATCHER_ACCOUNT=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+#PROPOSER_ACCOUNT=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+#SEQUENCER_ACCOUNT=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+ADMIN_ACCOUNT={{ roll_op_admin_account }}
+BATCHER_ACCOUNT={{ roll_op_batcher_account }}
+PROPOSER_ACCOUNT={{ roll_op_proposer_account }}
+SEQUENCER_ACCOUNT={{ roll_op_p2p_sequencer_account }}
+
+DEVNET_FUNDING_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+if $IS_DEVNET; then
+    if [[ $(bc <<< "$($HOME/.foundry/bin/cast balance $ADMIN_ACCOUNT) < 10000000000000000000") == 1 ]]; then
+        $HOME/.foundry/bin/cast send $ADMIN_ACCOUNT --value 10000ether --private-key $DEVNET_FUNDING_PRIVATE_KEY
+    fi
+    
+    if [[ $(bc <<< "$($HOME/.foundry/bin/cast balance $BATCHER_ACCOUNT) < 10000000000000000000") == 1 ]]; then
+        $HOME/.foundry/bin/cast send $BATCHER_ACCOUNT --value 10000ether --private-key $DEVNET_FUNDING_PRIVATE_KEY
+    fi
+    
+    if [[ $(bc <<< "$($HOME/.foundry/bin/cast balance $PROPOSER_ACCOUNT) < 10000000000000000000") == 1 ]]; then
+        $HOME/.foundry/bin/cast send $PROPOSER_ACCOUNT --value 10000ether --private-key $DEVNET_FUNDING_PRIVATE_KEY
+    fi
+    
+    if [[ $(bc <<< "$($HOME/.foundry/bin/cast balance $SEQUENCER_ACCOUNT) < 10000000000000000000") == 1 ]]; then
+        $HOME/.foundry/bin/cast send $SEQUENCER_ACCOUNT --value 10000ether --private-key $DEVNET_FUNDING_PRIVATE_KEY
+    fi
+fi
+
 if [ ! -f "./roll-op/deployments/$ROLLUP_NAME/addresses.json" ]; then
     ./roll-op/rollop --name=$ROLLUP_NAME --preset=$ROLLUP_PRESET --config=config.toml --no-ansi-esc deploy-l2
 fi

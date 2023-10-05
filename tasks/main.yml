@@ -4,9 +4,9 @@
 - user:
     name: '{{ansible_user}}'
     state: present
-  register: ansible_user_data 
+  register: rollop_ansible_user_data 
 - set_fact:
-    user_dir: '{{ansible_user_data.home}}'  
+    rollop_user_dir: '{{rollop_ansible_user_data.home}}'  
 
 - name: Install build-essential
   become: true
@@ -38,25 +38,24 @@
 - name: Check for an existing mnemonic file
   ansible.builtin.stat:
     path: 'roll-op/.mnemonic'
-  register: mnemonic_file_status
+  register: rollop_mnemonic_file_status
 
 - name: Retrieve mnemonic from file
   ansible.builtin.slurp:
     src: 'roll-op/.mnemonic'
   register: mnemonic_data
-  when: mnemonic_file_status.stat.exists
+  when: rollop_mnemonic_file_status.stat.exists
 
 - name: Set roll_op_seed_phrase to saved mnemonic
   set_fact:
     roll_op_seed_phrase: "{{ mnemonic_data['content'] | b64decode }}"
-  when: mnemonic_file_status.stat.exists
+  when: rollop_mnemonic_file_status.stat.exists
 
 - name: Generate data and new mnemonic
   block:
   - name: Run generate_accounts using existng mnemonic
     script: 'generate_accounts.py "{{roll_op_seed_phrase}}" {{roll_op_seed_phrase_language}}'
     args:
-      #chdir: 'roll-op'
       executable: python3
     register: account_output
   - name: Read account variables
@@ -95,6 +94,10 @@
       dest: 'roll-op/.mnemonic'
   when: roll_op_seed_phrase is not defined
 
+- name: Devnet variable
+  set_fact:
+    roll_op_is_devnet: '{{ roll_op_l1_rpc is not defined }}'
+
 - name: Get l1 chain id if rpc is defined
   block:
   - name: Call rpc for chain id
@@ -107,13 +110,13 @@
   - name: Extract l1 chain id
     set_fact:
       roll_op_l1_chain_id: '{{ roll_op_eth_chainId_results.json.result }}'
-  when: roll_op_l1_rpc is defined
+  when: not roll_op_is_devnet
 
 - name: Default l1 variables if rpc is not defined
   set_fact:
     roll_op_l1_chain_id: 900
     roll_op_l1_rpc: 'http://127.0.0.1:8545'
-  when: roll_op_l1_rpc is not defined
+  when: roll_op_is_devnet
 
 - name: Generate config.toml
   template:
@@ -131,6 +134,13 @@
   args:
     chdir: 'roll-op'
   when: roll_op_clean == true
+
+- name: Kill processes
+  shell: "lsof -i tcp:{{item}} | awk 'NR!=1 {print $2}' | xargs -r kill"
+  become: true
+  loop:
+    - 9545
+    - 7545
 
 - name: copy l1 service file
   become: true
