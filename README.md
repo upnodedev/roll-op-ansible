@@ -30,4 +30,4 @@ Including an example of how to use your role (for instance, with variables passe
 License
 -------
 
-MIT
+BSD 3-Clause License
