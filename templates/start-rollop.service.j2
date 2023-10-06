@@ -7,8 +7,8 @@ Type=simple
 Restart=always
 User={{ ansible_user }}
 Group={{ ansible_user }}
-WorkingDirectory={{ rollop_user_dir }}
-ExecStart=bash {{ rollop_user_dir }}/start-rollop.sh
+WorkingDirectory={{ roll_op_user_dir }}
+ExecStart=bash {{ roll_op_user_dir }}/start-rollop.sh
 
 [Install]
 WantedBy=multi-user.target
