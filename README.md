@@ -1,7 +1,7 @@
 roll-op-ansible
 =========
 
-An ansible script to simplify OP Stack launching process using https://github.com/0xFableOrg/roll-op
+An ansible script to simplify OP Stack deployment process using https://github.com/0xFableOrg/roll-op
 
 Requirements
 ------------
