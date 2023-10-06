@@ -43,32 +43,48 @@
 - name: Retrieve mnemonic from file
   ansible.builtin.slurp:
     src: 'roll-op/.mnemonic'
-  register: mnemonic_data
+  register: rollop_mnemonic_data
   when: rollop_mnemonic_file_status.stat.exists
 
 - name: Set roll_op_seed_phrase to saved mnemonic
   set_fact:
-    roll_op_seed_phrase: "{{ mnemonic_data['content'] | b64decode }}"
+    roll_op_seed_phrase: "{{ rollop_mnemonic_data['content'] | b64decode }}"
   when: rollop_mnemonic_file_status.stat.exists
 
-- name: Generate data and new mnemonic
+- set_fact:
+    have_all_private_keys: false
+    have_no_private_keys: false
+
+- set_fact:
+    have_all_private_keys: true
+  when: roll_op_seed_phrase is not defined and roll_op_admin_key is defined and roll_op_batcher_key is defined and roll_op_proposer_key is defined and roll_op_p2p_sequencer_key is defined
+
+- set_fact:
+    have_no_private_keys: true'
+  when: roll_op_admin_key is not defined and roll_op_batcher_key is not defined and roll_op_proposer_key is not defined and roll_op_p2p_sequencer_key is not defined
+
+- ansible.builtin.fail:
+    msg: Either a seed phrase or all of the following private keys (Admin, Batcher, Proposer, and Sequencer) must be provided.
+  when: not have_all_private_keys and not have_no_private_keys
+
+- name: Generate data from existing mnemonic
   block:
   - name: Run generate_accounts using existng mnemonic
-    script: 'generate_accounts.py "{{roll_op_seed_phrase}}" {{roll_op_seed_phrase_language}}'
+    script: 'generate_accounts.py mnemonic {{roll_op_seed_phrase_language}} "{{roll_op_seed_phrase}}"'
     args:
       executable: python3
-    register: account_output
+    register: rollop_account_output
   - name: Read account variables
     set_fact:
-      roll_op_admin_account: '{{ (account_output.stdout | from_json).adminAccount }}'
-      roll_op_admin_key: '{{ (account_output.stdout | from_json).adminKey }}'
-      roll_op_batcher_account: '{{ (account_output.stdout | from_json).batcherAccount }}'
-      roll_op_batcher_key: '{{ (account_output.stdout | from_json).batcherKey }}'
-      roll_op_proposer_account: '{{ (account_output.stdout | from_json).proposerAccount }}'
-      roll_op_proposer_key: '{{ (account_output.stdout | from_json).proposerKey }}'
-      roll_op_p2p_sequencer_account: '{{ (account_output.stdout | from_json).sequencerAccount }}'
-      roll_op_p2p_sequencer_key: '{{ (account_output.stdout | from_json).sequencerKey }}'
-  when: roll_op_seed_phrase is defined
+      roll_op_admin_account: '{{ (rollop_account_output.stdout | from_json).adminAccount }}'
+      roll_op_admin_key: '{{ (rollop_account_output.stdout | from_json).adminKey }}'
+      roll_op_batcher_account: '{{ (rollop_account_output.stdout | from_json).batcherAccount }}'
+      roll_op_batcher_key: '{{ (rollop_account_output.stdout | from_json).batcherKey }}'
+      roll_op_proposer_account: '{{ (rollop_account_output.stdout | from_json).proposerAccount }}'
+      roll_op_proposer_key: '{{ (rollop_account_output.stdout | from_json).proposerKey }}'
+      roll_op_p2p_sequencer_account: '{{ (rollop_account_output.stdout | from_json).sequencerAccount }}'
+      roll_op_p2p_sequencer_key: '{{ (rollop_account_output.stdout | from_json).sequencerKey }}'
+  when: roll_op_seed_phrase is defined and have_no_private_keys
 
 - name: Generate data and new mnemonic
   block:
@@ -76,23 +92,38 @@
     script: 'generate_accounts.py'
     args:
       executable: python3
-    register: account_output
+    register: rollop_account_output
   - name: Read account variables
     set_fact:
-      roll_op_new_seed_phrase: '{{ (account_output.stdout | from_json).mnemonic }}'
-      roll_op_admin_account: '{{ (account_output.stdout | from_json).adminAccount }}'
-      roll_op_admin_key: '{{ (account_output.stdout | from_json).adminKey }}'
-      roll_op_batcher_account: '{{ (account_output.stdout | from_json).batcherAccount }}'
-      roll_op_batcher_key: '{{ (account_output.stdout | from_json).batcherKey }}'
-      roll_op_proposer_account: '{{ (account_output.stdout | from_json).proposerAccount }}'
-      roll_op_proposer_key: '{{ (account_output.stdout | from_json).proposerKey }}'
-      roll_op_p2p_sequencer_account: '{{ (account_output.stdout | from_json).sequencerAccount }}'
-      roll_op_p2p_sequencer_key: '{{ (account_output.stdout | from_json).sequencerKey }}'
+      roll_op_new_seed_phrase: '{{ (rollop_account_output.stdout | from_json).mnemonic }}'
+      roll_op_admin_account: '{{ (rollop_account_output.stdout | from_json).adminAccount }}'
+      roll_op_admin_key: '{{ (rollop_account_output.stdout | from_json).adminKey }}'
+      roll_op_batcher_account: '{{ (rollop_account_output.stdout | from_json).batcherAccount }}'
+      roll_op_batcher_key: '{{ (rollop_account_output.stdout | from_json).batcherKey }}'
+      roll_op_proposer_account: '{{ (rollop_account_output.stdout | from_json).proposerAccount }}'
+      roll_op_proposer_key: '{{ (rollop_account_output.stdout | from_json).proposerKey }}'
+      roll_op_p2p_sequencer_account: '{{ (rollop_account_output.stdout | from_json).sequencerAccount }}'
+      roll_op_p2p_sequencer_key: '{{ (rollop_account_output.stdout | from_json).sequencerKey }}'
   - name: Save mnemonic to file
     copy:
       content: '{{roll_op_new_seed_phrase}}'
       dest: 'roll-op/.mnemonic'
-  when: roll_op_seed_phrase is not defined
+  when: roll_op_seed_phrase is not defined and have_no_private_keys
+
+- name: Extract account IDs from private keys
+  block:
+  - name: Run generate_accounts
+    script: 'generate_accounts.py "privateKey" {{roll_op_admin_key}} {{roll_op_batcher_key}} {{roll_op_proposer_key}} {{roll_op_p2p_sequencer_key}}'
+    args:
+      executable: python3
+    register: rollop_account_output
+  - name: Read account variables
+    set_fact:
+      roll_op_admin_account: '{{ (rollop_account_output.stdout | from_json).adminAccount }}'
+      roll_op_batcher_account: '{{ (rollop_account_output.stdout | from_json).batcherAccount }}'
+      roll_op_proposer_account: '{{ (rollop_account_output.stdout | from_json).proposerAccount }}'
+      roll_op_p2p_sequencer_account: '{{ (rollop_account_output.stdout | from_json).sequencerAccount }}'
+  when: have_all_private_keys
 
 - name: Devnet variable
   set_fact:
@@ -135,13 +166,6 @@
     chdir: 'roll-op'
   when: roll_op_clean == true
 
-- name: Kill processes
-  shell: "lsof -i tcp:{{item}} | awk 'NR!=1 {print $2}' | xargs -r kill"
-  become: true
-  loop:
-    - 9545
-    - 7545
-
 - name: copy l1 service file
   become: true
   template:
@@ -172,6 +196,14 @@
     mode: '0644'
     owner: root
     group: root
+
+- name: Kill processes
+  shell: "kill -9 $(sudo lsof -t -i:{{item}})"
+  become: true
+  ignore_errors: true
+  loop:
+    - 9545
+    - 7545
 
 - name: Set l2 service to desired state
   become: true

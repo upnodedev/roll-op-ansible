@@ -8,58 +8,92 @@ from typing import Optional
 import sys
 import json
 
-# Generate english mnemonic words
+def get_account_and_key(addressIndex):
+    bip44_derivation_admin: BIP44Derivation = BIP44Derivation(
+        cryptocurrency=EthereumMainnet, account=0, change=False, address=addressIndex
+    )
+    bip44_hdwallet.from_path(path=bip44_derivation_admin)
+    account = bip44_hdwallet.address()
+    key = f"0x{bip44_hdwallet.private_key()}"
+    bip44_hdwallet.clean_derivation()
+    return (account, key)
+
+def get_account_from_key(privateKey):
+    strippedPrivateKey = privateKey.removeprefix("0x")
+    bip44_hdwallet.from_private_key(strippedPrivateKey)
+    account = bip44_hdwallet.address()
+    bip44_hdwallet.clean_derivation()
+    return account
+    
+
+# read args into variables and generate mnemonic if required    
+keyMode = "mnemonic"
+if len(sys.argv) >= 2:
+    keyMode = sys.argv[1]
+
+# Generate mnemonic words or retrive mnemonic from args
 mnemonicLanguage="english"
 mnemonicText = ""
-if len(sys.argv) >= 3:
-    mnemonicLanguage = sys.argv[2]
-if len(sys.argv) >= 2:
-    mnemonicText = sys.argv[1]
-else:
-    mnemonicText = generate_mnemonic(language=mnemonicLanguage, strength=128)
+adminKey = ""
+batcherKey = ""
+proposerKey = ""
+sequencerKey = ""
+
+match keyMode:
+    case "mnemonic":
+        # Generate mnemonic words or retrive mnemonic from args
+        if len(sys.argv) >= 3:
+            mnemonicLanguage = sys.argv[2]
+        if len(sys.argv) >= 4:
+            mnemonicText = sys.argv[3]
+        else:
+            mnemonicText = generate_mnemonic(language=mnemonicLanguage, strength=128)
+    case "privateKey":
+        adminKey = mnemonicLanguage = sys.argv[2]
+        batcherKey = mnemonicLanguage = sys.argv[3]
+        proposerKey = mnemonicLanguage = sys.argv[4]
+        sequencerKey = mnemonicLanguage = sys.argv[5]
+
 # Secret passphrase/password for mnemonic
 PASSPHRASE: Optional[str] = None  # "meherett"
 
 # Initialize Ethereum mainnet BIP44HDWallet
 bip44_hdwallet: BIP44HDWallet = BIP44HDWallet(cryptocurrency=EthereumMainnet)
-# Get Ethereum BIP44HDWallet from mnemonic
-bip44_hdwallet.from_mnemonic(
-    mnemonic=mnemonicText, language=mnemonicLanguage, passphrase=PASSPHRASE
-)
-# Clean default BIP44 derivation indexes/paths
-bip44_hdwallet.clean_derivation()
 
-bip44_derivation_admin: BIP44Derivation = BIP44Derivation(
-    cryptocurrency=EthereumMainnet, account=0, change=False, address=0
-)
-bip44_hdwallet.from_path(path=bip44_derivation_admin)
-adminAccount = bip44_hdwallet.address()
-adminKey = f"0x{bip44_hdwallet.private_key()}"
-bip44_hdwallet.clean_derivation()
+# Generate accounts or extract account details
+match keyMode:
+    case "mnemonic":
+        # Generate required accounts from mnemonic
 
-bip44_derivation_admin: BIP44Derivation = BIP44Derivation(
-    cryptocurrency=EthereumMainnet, account=0, change=False, address=0
-)
-bip44_hdwallet.from_path(path=bip44_derivation_admin)
-batcherAccount = bip44_hdwallet.address()
-batcherKey = f"0x{bip44_hdwallet.private_key()}"
-bip44_hdwallet.clean_derivation()
+        # Get Ethereum BIP44HDWallet from mnemonic
+        bip44_hdwallet.from_mnemonic(
+            mnemonic=mnemonicText, language=mnemonicLanguage, passphrase=PASSPHRASE
+        )
+        # Clean default BIP44 derivation indexes/paths
 
-bip44_derivation_admin: BIP44Derivation = BIP44Derivation(
-    cryptocurrency=EthereumMainnet, account=0, change=False, address=0
-)
-bip44_hdwallet.from_path(path=bip44_derivation_admin)
-proposerAccount = bip44_hdwallet.address()
-proposerKey = f"0x{bip44_hdwallet.private_key()}"
-bip44_hdwallet.clean_derivation()
+        bip44_hdwallet.clean_derivation()
+        admin = get_account_and_key(0)
+        adminAccount = admin[0]
+        adminKey = admin[1]
 
-bip44_derivation_admin: BIP44Derivation = BIP44Derivation(
-    cryptocurrency=EthereumMainnet, account=0, change=False, address=0
-)
-bip44_hdwallet.from_path(path=bip44_derivation_admin)
-sequencerAccount = bip44_hdwallet.address()
-sequencerKey = f"0x{bip44_hdwallet.private_key()}"
-bip44_hdwallet.clean_derivation()
+        batcher = get_account_and_key(1)
+        batcherAccount = batcher[0]
+        batcherKey = batcher[1]
+
+        proposer = get_account_and_key(2)
+        proposerAccount = proposer[0]
+        proposerKey = proposer[1]
+
+        sequencer = get_account_and_key(3)
+        sequencerAccount = sequencer[0]
+        sequencerKey = sequencer[1]
+    case "privateKey":
+        # Extract account IDs from private keys
+        mnemonic=""
+        adminAccount = get_account_from_key(adminKey)
+        batcherAccount = get_account_from_key(batcherKey)
+        proposerAccount = get_account_from_key(proposerKey)
+        sequencerAccount = get_account_from_key(sequencerKey)
 
 output = {
     "mnemonic" : bip44_hdwallet.mnemonic(),
