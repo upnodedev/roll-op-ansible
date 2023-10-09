@@ -6,7 +6,13 @@
     state: present
   register: roll_op_ansible_user_data 
 - set_fact:
-    roll_op_user_dir: '{{roll_op_ansible_user_data.home}}'  
+    roll_op_user_dir: '{{roll_op_ansible_user_data.home}}'
+
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
 
 - name: Install build-essential
   become: true
@@ -20,6 +26,16 @@
 - name: Install geth
   become: true
   apt: name=ethereum state=latest update_cache=yes
+
+- name: Download foundryup
+  become: true
+  become_user: '{{ansible_user}}'
+  shell: 'curl -L https://foundry.paradigm.xyz | bash'
+
+- name: Install foundry
+  become: true
+  become_user: '{{ansible_user}}'
+  shell: '.foundry/bin/foundryup'
 
 - name: Python setup
   include_role:
@@ -165,6 +181,13 @@
   args:
     chdir: 'roll-op'
   when: roll_op_clean == true
+
+- name: Change roll-op folder permission if running as root
+  file:
+    path: roll-op
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+    recurse: true
 
 - name: copy l1 service file
   become: true
