@@ -152,6 +152,7 @@
       method: POST
       url: '{{roll_op_l1_rpc}}'
       return_content: yes
+      body_format: json
       body: '{"method":"eth_chainId","params":[],"id":1,"jsonrpc":"2.0"}'
     register: roll_op_eth_chainId_results
   - name: Extract l1 chain id
