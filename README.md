@@ -6,12 +6,29 @@ An ansible script to simplify OP Stack deployment process using https://github.c
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Recommended specification
+* 8 CPUs
+* 32 GB RAM
+* 512+ GB SSD or NVME disk
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+* `roll_op_l1_rpc` - L1 RPC Endpoint (Optional, if not supplied, will launch a devnet)
+* `roll_op_l2_chain_id` - L2 Chain ID (Default: 42069)
+* `roll_op_seed_phrase` - Seed phrase to generate Admin, Batcher, Proposer, and Sequencer
+* `roll_op_seed_phrase_language` - Language used in seed phrase (Default: english)
+* `roll_op_admin_key` - Admin private key
+* `roll_op_batcher_key` - Batcher private key
+* `roll_op_proposer_key` - Proposer private key
+* `roll_op_p2p_sequencer_key` - Sequencer private key
+* `roll_op_rollup_name` - Rollup Name (Default: getting-started)
+* `roll_op_clean` - Clean (Default: false)
+* `roll_op_preset` - Config Preset (dev or prod) (Default: dev)
+
+Note: Either a seed phrase or all private keys must be provided.
+
+More information about Rollup Name, Clean, and Config Preset are available at https://github.com/0xFableOrg/roll-op
 
 Dependencies
 ------------
@@ -25,7 +42,8 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - role: upnodedev.roll-op-ansible
+           
 
 License
 -------
