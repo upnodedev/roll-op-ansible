@@ -1,3 +1,0 @@
-roles:
-  # Install geerlingguy.pip from Ansible Galaxy.
-  - name: geerlingguy.pip
