@@ -51,21 +51,21 @@
     repo: 'https://github.com/0xFableOrg/roll-op'
     dest: 'roll-op'
 
-- name: Check for an existing mnemonic file
-  ansible.builtin.stat:
-    path: 'roll-op/.mnemonic'
-  register: roll_op_mnemonic_file_status
+# - name: Check for an existing mnemonic file
+#   ansible.builtin.stat:
+#     path: 'roll-op/.mnemonic'
+#   register: roll_op_mnemonic_file_status
 
-- name: Retrieve mnemonic from file
-  ansible.builtin.slurp:
-    src: 'roll-op/.mnemonic'
-  register: roll_op_mnemonic_data
-  when: roll_op_mnemonic_file_status.stat.exists
+# - name: Retrieve mnemonic from file
+#   ansible.builtin.slurp:
+#     src: 'roll-op/.mnemonic'
+#   register: roll_op_mnemonic_data
+#   when: roll_op_mnemonic_file_status.stat.exists
 
-- name: Set roll_op_seed_phrase to saved mnemonic
-  set_fact:
-    roll_op_seed_phrase: "{{ roll_op_mnemonic_data['content'] | b64decode }}"
-  when: roll_op_mnemonic_file_status.stat.exists
+# - name: Set roll_op_seed_phrase to saved mnemonic
+#   set_fact:
+#     roll_op_seed_phrase: "{{ roll_op_mnemonic_data['content'] | b64decode }}"
+#   when: roll_op_mnemonic_file_status.stat.exists
 
 - set_fact:
     have_all_private_keys: false
@@ -73,7 +73,7 @@
 
 - set_fact:
     have_all_private_keys: true
-  when: roll_op_seed_phrase is not defined and roll_op_admin_key is defined and roll_op_batcher_key is defined and roll_op_proposer_key is defined and roll_op_p2p_sequencer_key is defined
+  when: (roll_op_seed_phrase is not defined or roll_op_seed_phrase == "test test test test test test test test test test test junk") and roll_op_admin_key is defined and roll_op_batcher_key is defined and roll_op_proposer_key is defined and roll_op_p2p_sequencer_key is defined
 
 - set_fact:
     have_no_private_keys: true'
