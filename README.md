@@ -16,7 +16,7 @@ Role Variables
 
 * `roll_op_l1_rpc` - L1 RPC Endpoint (Optional, if not supplied, will launch a devnet)
 * `roll_op_l2_chain_id` - L2 Chain ID (Default: 42069)
-* `roll_op_seed_phrase` - Seed phrase to generate Admin, Batcher, Proposer, and Sequencer
+* `roll_op_seed_phrase` - Seed phrase to generate Admin, Batcher, Proposer, and Sequencer (Default: test ... junk)
 * `roll_op_seed_phrase_language` - Language used in seed phrase (Default: english)
 * `roll_op_admin_key` - Admin private key
 * `roll_op_batcher_key` - Batcher private key
@@ -26,7 +26,7 @@ Role Variables
 * `roll_op_clean` - Clean (Default: false)
 * `roll_op_preset` - Config Preset (dev or prod) (Default: dev)
 
-Note: Either a seed phrase or all private keys must be provided.
+Note: Seed phrase and private keys can't be provided at the same time.
 
 More information about Rollup Name, Clean, and Config Preset are available at https://github.com/0xFableOrg/roll-op
 
