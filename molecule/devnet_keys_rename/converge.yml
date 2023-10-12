@@ -1,0 +1,27 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Test roll-op devnet installation
+      ansible.builtin.include_role:
+        name: upnodedev.op.roll_op
+      vars:
+        ansible_user: root
+        roll_op_admin_key: 0x48784a07e276e5c0fcf9ce9d629d267eb3afb49c0364c39f2a6e9926353e96b0 
+        roll_op_batcher_key: 0x4c676a56340e67a7049111fb07affe49fbe79d0d479ff54b9278002bc353c9c4 
+        roll_op_proposer_key: 0x424edfe01a697411a1033c16804516f7f39d9ecd82fd898246a2e9f44387ee70 
+        roll_op_p2p_sequencer_key: 0xb02000fa9e115dfbd771af21519b08d4019dc6bfad8d00b978f9771e5760094f
+        roll_op_state: started    
+    - name: Re-run with a different name
+      ansible.builtin.include_role:
+        name: upnodedev.op.roll_op
+      vars:
+        ansible_user: root
+        roll_op_rollup_name: new-name
+        roll_op_admin_key: 0x48784a07e276e5c0fcf9ce9d629d267eb3afb49c0364c39f2a6e9926353e96b0 
+        roll_op_batcher_key: 0x4c676a56340e67a7049111fb07affe49fbe79d0d479ff54b9278002bc353c9c4 
+        roll_op_proposer_key: 0x424edfe01a697411a1033c16804516f7f39d9ecd82fd898246a2e9f44387ee70 
+        roll_op_p2p_sequencer_key: 0xb02000fa9e115dfbd771af21519b08d4019dc6bfad8d00b978f9771e5760094f
+        roll_op_state: restarted    
