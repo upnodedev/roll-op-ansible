@@ -1,10 +1,11 @@
 - name: Prepare the Molecule Test Resources
-  hosts: pdns
+  hosts: all
   tasks:
     - name: Create a login user
       user:
         name: ubuntu
-        password: 'ubuntu_pwd'
+        password: "{{ 'ubuntu_pwd' | password_hash('sha512', 'salt') }}"
         groups: 
          - sudo
         state: present
+        shell: /bin/bash
