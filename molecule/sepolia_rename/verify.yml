@@ -1,0 +1,29 @@
+- name: Verify
+  hosts: all
+  
+  tasks:
+    - name: get service status
+      service_facts:
+      register: services_state
+    - name: check if the l1 service is present
+      ansible.builtin.fail:
+        msg: l1 service not present
+      when: ansible_facts.services["rollop-l1-rpc.service"] is not defined
+    - name: Debug rollop-l1-rpc
+      debug:
+        var: ansible_facts.services["rollop-l1-rpc.service"]
+    - name: check if the l1 service is running
+      ansible.builtin.fail:
+        msg: l1 service not running
+      when: ansible_facts.services["rollop-l1-rpc.service"].state != 'running'
+    - name: check if the start-rollop service is present
+      ansible.builtin.fail:
+        msg: start-rollop service not present
+      when: ansible_facts.services["start-rollop.service"] is not defined
+    - name: Debug start-rollop
+      debug:
+        var: ansible_facts.services["start-rollop.service"]
+    - name: Debug start-rollop
+      ansible.builtin.fail:
+        msg: start-rollop service not running
+      when: ansible_facts.services["start-rollop.service"].state != 'running'

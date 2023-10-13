@@ -19,20 +19,20 @@ scenario:
   create_sequence:
 #    - dependency
     - create
-#    - prepare
+    - prepare
   check_sequence:
 #    - dependency
 #    - cleanup
     - destroy
     - create
-#    - prepare
+    - prepare
     - converge
     - check
     - destroy
   converge_sequence:
 #    - dependency
     - create
-#    - prepare
+    - prepare
     - converge
   destroy_sequence:
 #    - dependency
@@ -44,10 +44,10 @@ scenario:
     - destroy
     - syntax
     - create
-#    - prepare
+    - prepare
     - converge
-    - idempotence
-    - side_effect
+#    - idempotence
+#    - side_effect
     - verify
 #    - cleanup
     - destroy

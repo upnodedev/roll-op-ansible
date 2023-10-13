@@ -1,0 +1,10 @@
+- name: Prepare the Molecule Test Resources
+  hosts: pdns
+  tasks:
+    - name: Create a login user
+      user:
+        name: ubuntu
+        password: 'ubuntu_pwd'
+        groups: 
+         - sudo
+        state: present
