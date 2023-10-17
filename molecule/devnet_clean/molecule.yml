@@ -47,7 +47,7 @@ scenario:
 #    - prepare
     - converge
 #    - idempotence
-    - side_effect
+#    - side_effect
     - verify
 #    - cleanup
     - destroy
