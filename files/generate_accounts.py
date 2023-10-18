@@ -14,7 +14,7 @@ def get_account_and_key(addressIndex):
     )
     bip44_hdwallet.from_path(path=bip44_derivation_admin)
     account = bip44_hdwallet.address()
-    key = f"0x{bip44_hdwallet.private_key()}"
+    key = bip44_hdwallet.private_key()
     bip44_hdwallet.clean_derivation()
     return (account, key)
 
