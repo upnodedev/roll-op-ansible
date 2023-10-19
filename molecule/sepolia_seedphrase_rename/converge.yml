@@ -1,0 +1,23 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Test roll-op devnet installation
+      ansible.builtin.include_role:
+        name: upnodedev.op.roll_op
+      vars:
+        ansible_user: root
+        roll_op_seed_phrase: 'wet hole defense spread typical coffee dragon pumpkin size sad eight profit'
+        roll_op_l1_rpc: 'https://eth-sepolia.blastapi.io/8377145d-9358-46e9-914b-35df19dc5de7'
+        roll_op_state: started
+    - name: Re-run with a different name
+      ansible.builtin.include_role:
+        name: upnodedev.op.roll_op
+      vars:
+        ansible_user: root
+        roll_op_rollup_name: new-name
+        roll_op_seed_phrase: 'wet hole defense spread typical coffee dragon pumpkin size sad eight profit'
+        roll_op_l1_rpc: 'https://eth-sepolia.blastapi.io/8377145d-9358-46e9-914b-35df19dc5de7'
+        roll_op_state: restarted

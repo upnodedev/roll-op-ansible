@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Test roll-op devnet installation
+      ansible.builtin.include_role:
+        name: upnodedev.op.roll_op
+#        name: roll-op-ansible
+      vars:
+        ansible_user: root
+        roll_op_state: started

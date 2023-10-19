@@ -18,6 +18,15 @@
   become: true
   apt: name=build-essential state=latest update_cache=yes
 
+- name: Install required apt packages
+  become: true
+  apt:
+    name:
+      - software-properties-common
+      - git
+      - curl
+      - dirmngr
+
 - name: Add etherium repository
   become: true
   ansible.builtin.apt_repository:
@@ -35,7 +44,7 @@
 - name: Install foundry
   become: true
   become_user: '{{ansible_user}}'
-  shell: '.foundry/bin/foundryup'
+  shell: '{{roll_op_user_dir}}/.foundry/bin/foundryup'
 
 - name: Python setup
   include_role:
@@ -169,23 +178,37 @@
 - name: Generate config.toml
   template:
     src: config.toml.j2
-    dest: 'roll-op/config.toml'
+    dest: '{{roll_op_user_dir}}/roll-op/config.toml'
     mode: '0644'
 
+- name: Stop l1 service if running
+  become: true
+  ignore_errors: true
+  systemd:
+    name: rollop-l1-rpc
+    state: stopped
+
+- name: Stop l2 service if running
+  become: true
+  ignore_errors: true
+  systemd:
+    name: start-rollop
+    state: stopped
+
 - name: Run rollop setup
-  shell: './rollop --no-ansi-esc setup --yes'
+  shell: '{{roll_op_user_dir}}/roll-op/rollop --no-ansi-esc setup --yes'
   args:
-    chdir: 'roll-op'
+    chdir: '{{roll_op_user_dir}}/roll-op'
 
 - name: Run rollop clean
-  shell: './rollop --name={{roll_op_rollup_name}} --no-ansi-esc clean'
+  shell: '{{roll_op_user_dir}}/roll-op/rollop --name={{roll_op_rollup_name}} --no-ansi-esc clean'
   args:
-    chdir: 'roll-op'
+    chdir: '{{roll_op_user_dir}}/roll-op'
   when: roll_op_clean == true
 
 - name: Change roll-op folder permission if running as root
   file:
-    path: roll-op
+    path: '{{roll_op_user_dir}}/roll-op'
     owner: '{{ ansible_user }}'
     group: '{{ ansible_user }}'
     recurse: true
@@ -209,7 +232,7 @@
 - name: Generate startup script
   template:
     src: start-rollop.sh.j2
-    dest: 'start-rollop.sh'
+    dest: '{{roll_op_user_dir}}/start-rollop.sh'
     mode: '0755'
 
 - name: copy l2 service file
