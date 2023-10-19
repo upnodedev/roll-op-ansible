@@ -48,7 +48,7 @@
 
 - name: Clone roll-op repo
   git:
-    repo: 'https://github.com/0xFableOrg/roll-op'
+    repo: 'https://github.com/upnodedev/roll-op'
     dest: 'roll-op'
 
 # - name: Check for an existing mnemonic file
