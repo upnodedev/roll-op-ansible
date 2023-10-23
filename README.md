@@ -14,7 +14,7 @@ Recommended specification
 Role Variables
 --------------
 
-* -`roll_op_status` - The status of the l1 and l2 services at the end of installation (Required, should be started, restarted, stopped) 
+* `roll_op_status` - The status of the l1 and l2 services at the end of installation (Required, should be started, restarted, stopped) 
 * `roll_op_rollup_name` - Rollup name (Default: getting-started)
 * `roll_op_clean` - If true, cleans up deployment outputs and databases before launching services (Default: false)
 * `roll_op_preset` - The preset rollup configuration to use (dev or prod) (Default: dev)
