@@ -44,7 +44,7 @@ To install using only default parameters (the dev preset and the 'test ... junk'
 
     - hosts: servers
       roles:
-         - role: upnodedev.roll-op-ansible
+         - role: upnodedev.op.roll_op
       vars:
         roll_op_status: started           
 
@@ -52,7 +52,7 @@ To use a specified seedphrase
 
     - hosts: servers
       roles:
-         - role: upnodedev.roll-op-ansible
+         - role: upnodedev.op.roll_op
       vars:
         roll_op_status: started   
         roll_op_seed_phrase: 'test test test test test test test test test test test junk'       
@@ -61,7 +61,7 @@ To use an external l2 rpc
 
     - hosts: servers
       roles:
-         - role: upnodedev.roll-op-ansible
+         - role: upnodedev.op.roll_op
       vars:
         roll_op_status: started
         roll_op_l1_rpc: 'https://eth-sepolia.blastapi.io/########-####-####-####-############' 
@@ -71,7 +71,7 @@ To use specified private keys in place of a seedphrase
 
     - hosts: servers
       roles:
-         - role: upnodedev.roll-op-ansible
+         - role: upnodedev.op.roll_op
       vars:
         roll_op_status: started
         roll_op_admin_key: a##############################################################0
