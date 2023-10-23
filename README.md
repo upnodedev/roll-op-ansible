@@ -64,7 +64,7 @@ To use an external l2 rpc
          - role: upnodedev.roll-op-ansible
       vars:
         roll_op_status: started
-        roll_op_l1_rpc: 'https://eth-sepolia.blastapi.io/########-####-####-####-############' 
+        roll_op_l1_rpc: 'https://eth-sepolia.g.alchemy.com/v2/...<ALCHEMY_API_KEY>...' 
         roll_op_seed_phrase: 'test test test test test test test test test test test junk'
 
 To use specified private keys in place of a seedphrase
